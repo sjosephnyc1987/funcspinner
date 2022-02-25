@@ -6,6 +6,8 @@ Created on Tue Feb 22 14:46:12 2022
 Funcspinner is a library of curve fitting functions that can be used as the objective
 function when a curve is being fit.
 
+Check Medium please
+
 @author: stephenjoseph
 """
 
