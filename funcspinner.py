@@ -17,12 +17,7 @@ import numpy as np
 
 #must take the independent variable as the first argument.
 
-def test(x,*args):
-    #need at least one argument
-    if len(args)>=0:
-        a=list(args)[1]
-        print(a)
-        return a*x
+#the following are the functions that will be returned when their name is called in function_return method.
 
 def simplelinear(x,a,b): return a+(b*x)
 def quadratic(x,a,b,c): return a+(b*x)+c*(x**2)
@@ -67,13 +62,18 @@ def gaussian(x,a,b,c): return  a*np.exp(-np.power(x - b, 2)/(2*np.power(c, 2)))
 
 
 
+
+#this function returns individual function based on the name passed. 
+#to curve fit a matrix of mulitple models, use the function_return_all function.
+
 def function_return(funcname):
     
         if funcname == "all":
-            print ("we will be running thru all the functions")
+            raise Exception('please use the all_function method')  
+            
 
         elif funcname == "simplelinear" :return simplelinear
-        elif funcname == "test" :return test
+        #elif funcname == "test" :return test
         elif funcname == "quadratic" :return quadratic
         elif funcname == "cubic" :return cubic
         elif funcname == "polyratio11" :return polyratio11
@@ -115,12 +115,42 @@ def function_return(funcname):
         elif funcname == "gaussian" :return gaussian
 
 
+#this function returns a dictionary of all the curves cataloged in this module
+#spin through them in a loop to get a matrix of results.
+
+def function_return_all(funcname_all):
+    
+        if funcname_all == "all":
+            
+            return {'simplelinear':simplelinear,'quadratic':quadratic ,'cubic':cubic ,
+                    'polyratio11':polyratio11 ,'polyratio22':polyratio22 ,
+                    'polyratio44':polyratio44 ,
+                    'michaelismenten':michaelismenten ,'reciprocal':reciprocal ,
+                    'bleasdalenelder':bleasdalenelder ,'farazdaghiharris':farazdaghiharris ,
+                    'holliday':holliday ,'exponential':exponential ,'monomolecular':monomolecular ,
+                    'threeparameterlogistic':threeparameterlogistic ,
+                    'fourparameterlogistic':fourparameterlogistic ,'gompertz':gompertz ,
+                    'weibull':weibull ,'morganmercerfloding':morganmercerfloding ,
+                    'richards':richards ,'logarithmic':logarithmic ,'power':power ,
+                    'powertopower':powertopower ,'sumexponentials':sumexponentials ,
+                    'exponential1':exponential1 ,'exponential2':exponential2 ,
+                    'normal':normal ,'lognormal':lognormal ,'exponential':exponential ,
+                    'michaelismenten2':michaelismenten2 ,'michaelismenten3':michaelismenten3 ,
+                    'linearlinear':linearlinear ,'linearquadratic':linearquadratic ,
+                    'quadraticlinear':quadraticlinear ,'quadraticquadratic':quadraticquadratic ,
+                    'linear3':linear3 ,'gompertz2':gompertz2 ,'hill2':hill2 ,
+                    'sum3exponentials':sum3exponentials ,'gaussian':gaussian}
+            
+        #REMOVED  - need to be added back
+        #'polyratio33':polyratio33 
+        #
+            
+           
+        else:
+            raise Exception('this function only accepts the param all, you sent - ', str(funcname_all))
+
 
         
-# import inspect
-# ee = inspect.getsource(funky)
-# print(eel)
-# eel = inspect.getsource(funky("simplelinear"))
-# print(eel)
+        
 
 
