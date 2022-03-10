@@ -32,7 +32,7 @@ def bleasdalenelder(x,a,b,c): return ((a+(b*x))**(-1/c))
 def farazdaghiharris(x,a,b,c): return 1/(a+b*(x**c))
 def holliday(x,a,b,c): return 1/(a+(b*x)+(c*(x**2)))
 def exponential(x,a,b): return np.exp(a*(x-b))
-def monomolecular(x,a,b,c): return a*(1-np.exp(-b*(x-c)))
+#def monomolecular(x,a,b,c): return a*(1-np.exp(-b*(x-c)))
 def threeparameterlogistic(x,a,b,c): return a/(1+b*(np.exp(-c*x)))
 def fourparameterlogistic(x,a,b,c,d): return (d+(a-d))/(1+b*(np.exp(-c*x)))
 def gompertz(x,a,b,c): return a*(np.exp(-np.exp(-b*(x-c))))
@@ -86,7 +86,7 @@ def function_return(funcname):
         elif funcname == "farazdaghiharris" :return farazdaghiharris
         elif funcname == "holliday" :return holliday
         elif funcname == "exponential" :return exponential
-        elif funcname == "monomolecular" :return monomolecular
+        #elif funcname == "monomolecular" :return monomolecular
         elif funcname == "threeparameterlogistic" :return threeparameterlogistic
         elif funcname == "fourparameterlogistic" :return fourparameterlogistic
         elif funcname == "gompertz" :return gompertz
@@ -124,10 +124,9 @@ def function_return_all(funcname_all):
             
             return {'simplelinear':simplelinear,'quadratic':quadratic ,'cubic':cubic ,
                     'polyratio11':polyratio11 ,'polyratio22':polyratio22 ,
-                    'polyratio44':polyratio44 ,
                     'michaelismenten':michaelismenten ,'reciprocal':reciprocal ,
                     'bleasdalenelder':bleasdalenelder ,'farazdaghiharris':farazdaghiharris ,
-                    'holliday':holliday ,'exponential':exponential ,'monomolecular':monomolecular ,
+                    'holliday':holliday ,
                     'threeparameterlogistic':threeparameterlogistic ,
                     'fourparameterlogistic':fourparameterlogistic ,'gompertz':gompertz ,
                     'weibull':weibull ,'morganmercerfloding':morganmercerfloding ,
@@ -136,15 +135,16 @@ def function_return_all(funcname_all):
                     'exponential1':exponential1 ,'exponential2':exponential2 ,
                     'normal':normal ,'lognormal':lognormal ,'exponential':exponential ,
                     'michaelismenten2':michaelismenten2 ,'michaelismenten3':michaelismenten3 ,
-                    'linearlinear':linearlinear ,'linearquadratic':linearquadratic ,
+                    'linearlinear':linearlinear ,
                     'quadraticlinear':quadraticlinear ,'quadraticquadratic':quadraticquadratic ,
                     'linear3':linear3 ,'gompertz2':gompertz2 ,'hill2':hill2 ,
                     'sum3exponentials':sum3exponentials ,'gaussian':gaussian}
             
         #REMOVED  - need to be added back
         #'polyratio33':polyratio33 
-        #
-            
+        #'exponential':exponential 
+        #'monomolecular':monomolecular 
+        #'linearquadratic':linearquadratic ,
            
         else:
             raise Exception('this function only accepts the param all, you sent - ', str(funcname_all))
