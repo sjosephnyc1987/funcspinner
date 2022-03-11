@@ -34,12 +34,12 @@ def holliday(x,a,b,c): return 1/(a+(b*x)+(c*(x**2)))
 def exponential(x,a,b): return np.exp(a*(x-b))
 #def monomolecular(x,a,b,c): return a*(1-np.exp(-b*(x-c)))
 def threeparameterlogistic(x,a,b,c): return a/(1+b*(np.exp(-c*x)))
-def fourparameterlogistic(x,a,b,c,d): return (d+(a-d))/(1+b*(np.exp(-c*x)))
+#def fourparameterlogistic(x,a,b,c,d): return (d+(a-d))/(1+b*(np.exp(-c*x)))
 def gompertz(x,a,b,c): return a*(np.exp(-np.exp(-b*(x-c))))
 def weibull(x,a,b,c,d): return a-(a-b)*np.exp(- (c*np.absolute(x))**d)
-def morganmercerfloding(x,a,b,c,d): return (a-(a-b))  / (1+(c*np.absolute(x))**d)
+#def morganmercerfloding(x,a,b,c,d): return (a-(a-b))  / (1+(c*np.absolute(x))**d)
 def richards(x,a,b,c,d): return a*(1+(b-1)*np.exp(-c*(x-d)))**(1/(1-b))
-def logarithmic(x,a,b): return b*(np.log(np.absolute(x)-a))
+def logarithmic(x,a,b): return b*(np.log(np.absolute(x)-a)) #this fn > 2
 def power(x,a,b): return a*(1-(b**x))
 def powertopower(x,a,b,c): return a*(x**(b*(x**c)))
 def sumexponentials(x,a,b,c,d): return a*(np.exp(-b*x))+c*(np.exp(-d*x))
@@ -82,8 +82,8 @@ def function_return(funcname):
         elif funcname == "polyratio44" :return polyratio44
         elif funcname == "michaelismenten" :return michaelismenten
         elif funcname == "reciprocal" :return reciprocal
-        elif funcname == "bleasdalenelder" :return bleasdalenelder
-        elif funcname == "farazdaghiharris" :return farazdaghiharris
+        elif funcname == "bleasdalenelder" :return bleasdalenelder #needs only positive values
+        elif funcname == "farazdaghiharris" :return farazdaghiharris #needs only positive values
         elif funcname == "holliday" :return holliday
         elif funcname == "exponential" :return exponential
         #elif funcname == "monomolecular" :return monomolecular
@@ -113,7 +113,9 @@ def function_return(funcname):
         elif funcname == "hill2" :return hill2
         elif funcname == "sum3exponentials" :return sum3exponentials
         elif funcname == "gaussian" :return gaussian
-
+        else:
+            raise Exception('function not found, please consult documentation here: \n https://github.com/sjosephnyc1987/funcspinner')
+        
 
 #this function returns a dictionary of all the curves cataloged in this module
 #spin through them in a loop to get a matrix of results.
