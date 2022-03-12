@@ -25,7 +25,7 @@ import Git_PythonCodeSamples.funcspinner.funcspinner as funcspinner
 x=np.linspace(-10, 10,100)
 
 
-functionname = "gaussian"
+functionname = "linearquadratic"
 
 
 #get the function from the funcspinner class.
