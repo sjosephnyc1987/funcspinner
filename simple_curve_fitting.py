@@ -22,11 +22,15 @@ from scipy.optimize import curve_fit
 
 import Git_PythonCodeSamples.funcspinner.funcspinner as funcspinner
 
-x=np.linspace(-10, 10,100)
+
+x_start = 0
+x_end =10
+
+x=np.linspace(x_start, x_end,100)
 
 
-functionname = "linearquadratic"
-
+functionname = "normal"
+print("\n---------BEGIN---------")
 
 #get the function from the funcspinner class.
 objective_function = funcspinner.function_return(functionname)
@@ -36,12 +40,19 @@ import inspect
 print(inspect.getsource(objective_function))
 
 
+
+
+
 #do linear fit just to figure out how many params your function needs
 #there are waaaay better ways to do this, but let's stick with this for 
 #for lack of time.
-fit_paramsL, covariances = curve_fit(objective_function, x, x, maxfev=50000)
+fit_paramsL, covariances = curve_fit(objective_function, x, x, maxfev=500000,p0=(1,1,1,1))
 
 
+print("params ", fit_paramsL)
+print("covariances: \n ", covariances)
+
+#print("-----debug-------")
 #create an array for the params to be passed to the univariate model
 fit_params_all1=[]
 
@@ -53,10 +64,29 @@ for u in range(len(fit_paramsL)):
 y = objective_function(x,*fit_params_all1) 
 
 #
-
+plt.axhline(0, color='grey')
+plt.axvline(0, color='grey')
 plt.plot(x,y,'--',color='green',label='univariate fit')
 plt.legend(loc='lower right')
+
+
 title = "univariate " + functionname + " model"
 plt.title(title)
 
+
+
+print("\n\n\n---------END---------\n\n\n")
+
+print("******debug section*******\n")
+
+
+#spinning thru numbers one by one
+
+looped_y= []
+
+for tt in x:
+    y_temp_loop = objective_function(tt,*fit_paramsL)
+    looped_y.append(y_temp_loop)
+
+#print(looped_y)
 
