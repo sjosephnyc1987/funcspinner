@@ -22,6 +22,7 @@ import numpy as np
 def simplelinear(x,a,b): return a+(b*x)
 def quadratic(x,a,b,c): return a+(b*x)+c*(x**2)
 def cubic(x,a,b,c,d): return a+(b*x)+(c*(x**2))+(d*(x**3))
+def saturationGrowthRate(x,a,b):return a*(x/(b+x))
 def polyratio11(x,a,b,c): return (a+(b*x))/(1+(c*x))
 def polyratio22(x,a,b,c,d,e): return (a+(b*x)+(c*(x**2)))/(1+(d*x)+(e*(x**2)))
 def polyratio33(x,a,b,c,d,e,f,g): return (a+(b*x)+c*(x**2)+d*(x**3))/(1+(e*x)+f*(x**2)+g*(x**3))
@@ -76,6 +77,7 @@ def function_return(funcname):
         #elif funcname == "test" :return test
         elif funcname == "quadratic" :return quadratic
         elif funcname == "cubic" :return cubic
+        elif funcname == "saturationGrowthRate" :return saturationGrowthRate #from Chapra
         elif funcname == "polyratio11" :return polyratio11
         elif funcname == "polyratio22" :return polyratio22
         elif funcname == "polyratio33" :return polyratio33

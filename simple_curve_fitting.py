@@ -29,7 +29,7 @@ x_end =10
 x=np.linspace(x_start, x_end,100)
 
 
-functionname = "normal"
+functionname = "saturationGrowthRate"
 print("\n---------BEGIN---------")
 
 #get the function from the funcspinner class.
@@ -46,7 +46,7 @@ print(inspect.getsource(objective_function))
 #do linear fit just to figure out how many params your function needs
 #there are waaaay better ways to do this, but let's stick with this for 
 #for lack of time.
-fit_paramsL, covariances = curve_fit(objective_function, x, x, maxfev=500000,p0=(1,1,1,1))
+fit_paramsL, covariances = curve_fit(objective_function, x, x, maxfev=500000)
 
 
 print("params ", fit_paramsL)
@@ -64,8 +64,8 @@ for u in range(len(fit_paramsL)):
 y = objective_function(x,*fit_params_all1) 
 
 #
-plt.axhline(0, color='grey')
-plt.axvline(0, color='grey')
+plt.axhline(0, color='pink')
+plt.axvline(0, color='pink')
 plt.plot(x,y,'--',color='green',label='univariate fit')
 plt.legend(loc='lower right')
 
