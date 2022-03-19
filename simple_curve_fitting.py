@@ -23,13 +23,13 @@ from scipy.optimize import curve_fit
 import Git_PythonCodeSamples.funcspinner.funcspinner as funcspinner
 
 
-x_start = 0
+x_start = -10
 x_end =10
 
 x=np.linspace(x_start, x_end,100)
 
 
-functionname = "saturationGrowthRate"
+functionname = "threeparameterlogistic"
 print("\n---------BEGIN---------")
 
 #get the function from the funcspinner class.
@@ -75,10 +75,7 @@ plt.title(title)
 
 
 
-print("\n\n\n---------END---------\n\n\n")
-
-print("******debug section*******\n")
-
+print("\n---------END---------\n\n\n")
 
 #spinning thru numbers one by one
 
