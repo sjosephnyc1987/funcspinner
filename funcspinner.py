@@ -21,7 +21,6 @@ LMfit
 import numpy as np
 
 #must take the independent variable as the first argument.
-
 #the following are the functions that will be returned when their name is called in function_return method.
 
 def simpleLinear(x,a,b): return a+(b*x)
@@ -29,18 +28,34 @@ def test (x):return x
 def quadratic(x,a,b,c): return a+(b*x)+c*(x**2)
 def cubic(x,a,b,c,d): return a+(b*x)+(c*(x**2))+(d*(x**3))
 
+def saturationGrowthRate2(x,a,b): #x > 0
+        try:
+            if all(j > 0 for j in x):
+                return ((a+(b*x))**(-1/c))
+        except:       
+           print("\n======values of independant variable x need to be greater than 0=======\n")
+           #raise Exception('values of independant variable x need to be greater than 0')
+           raise
+
+
 def saturationGrowthRate(x,a,b): #x > 0
         if all(j > 0 for j in x):
             return a*(x/(b+x)) 
         else:
-            raise Exception('values of independant variable x need to be greater than 0')  
+            print("\n======values of independant variable x need to be greater than 0=======\n")
+            return
+        #raise Exception('values of independant variable x need to be greater than 0')
+
 def simpleExponential(x,a,b):return a*np.exp(b*x) #from chapra
 
 def simplePower(x,a,b): #x > 0
        if all(j > 0 for j in x):
            return a*(x**b) 
        else:
-           raise Exception('values of independant variable x need to be greater than 0')   
+            print("\n======values of independant variable x need to be greater than 0=======\n")
+            return
+           #raise Exception('values of independant variable x need to be greater than 0')   
+           
 def polyRatio11(x,a,b,c): return (a+(b*x))/(1+(c*x))
 def polyRatio22(x,a,b,c,d,e): return (a+(b*x)+(c*(x**2)))/(1+(d*x)+(e*(x**2)))
 def polyRatio33(x,a,b,c,d,e,f,g): return (a+(b*x)+c*(x**2)+d*(x**3))/(1+(e*x)+f*(x**2)+g*(x**3))
@@ -52,13 +67,15 @@ def bleasdaleNelder(x,a,b,c): #x > 0
        if all(j > 0 for j in x):
            return ((a+(b*x))**(-1/c))
        else:
-           raise Exception('values of independant variable x need to be greater than 0')   
+           print("\n======values of independant variable x need to be greater than 0=======\n")
+           return
 
 def farazdaghiHarris(x,a,b,c): #x > 0
        if all(j > 0 for j in x):
            return 1/(a+b*(x**c))
        else:
-           raise Exception('values of independant variable x need to be greater than 0')     
+           print("\n======values of independant variable x need to be greater than 0=======\n")
+           return
     
 def holliday(x,a,b,c): return 1/(a+(b*x)+(c*(x**2)))
 def exponential(x,a,b): return np.exp(a*(x-b))
@@ -71,7 +88,8 @@ def logarithmic(x,a,b): #x > 1.1
        if all(j > 1.1 for j in x):
            return b*(np.log(np.absolute(x)-a)) 
        else:
-           raise Exception('values of independant variable x need to be greater than 1.1')     
+           print("\n======values of independant variable x need to be greater than 0=======\n")
+           return
     
 def power(x,a,b): return a*(1-(b**x))
 
@@ -79,19 +97,22 @@ def powerToPower(x,a,b,c): #x > 0
        if all(j > 0 for j in x):
            return a*(x**(b*(x**c)))
        else:
-           raise Exception('values of independant variable x need to be greater than 0')     
+           print("\n======values of independant variable x need to be greater than 0=======\n")
+           return
     
 def sumExponentials(x,a,b,c,d): #cannot contain 1
        if all(j == 1 for j in x):
            return a*(np.exp(-b*x))+c*(np.exp(-d*x))
        else:
-           raise Exception('values of independant variable x need to be greater than 0')     
+           print("\n======values of independant variable x need to be greater than 0=======\n")
+           return
     
 def exponential1(x,a,b,c): #x > 0
        if all(j > 0 for j in x):
            return a*(x**b)*np.exp(-c*x)
        else:
-           raise Exception('values of independant variable x need to be greater than 0')     
+           print("\n======values of independant variable x need to be greater than 0=======\n")
+           return
     
 def exponential2(x,a,b,c,d): return (a+b*x)*np.exp(-c*x)+d
 def normal(x,a,b,c,d): return a+b*(np.exp(-c*(x-d)**2))
@@ -111,8 +132,9 @@ def sum3Exponentials(x,a,b,c,d,e,f): #x > -10
        if all(j > -10 for j in x):
            return a*(np.exp(-b*x))-c*(np.exp(-d*x))+e*(np.exp(-f*x))
        else:
-           raise Exception('values of independant variable x need to be greater than -10')     
-    
+           print("\n======values of independant variable x need to be greater than 0=======\n")
+           return
+
 def gaussian(x,a,b,c): return  a*np.exp(-np.power(x - b, 2)/(2*np.power(c, 2)))
 
 
@@ -131,6 +153,12 @@ def function_return(funcname):
         elif funcname == "quadratic" :return quadratic
         elif funcname == "cubic" :return cubic
         elif funcname == "saturationGrowthRate" :return saturationGrowthRate #from Chapra
+
+        elif funcname == "saturationGrowthRate2" :return saturationGrowthRate2 #from Chapra
+        
+
+
+        
         elif funcname == "simpleExponential":return simpleExponential #form Chapra
         elif funcname == "simplePower":return simplePower #from Chapra
         elif funcname == "polyRatio11" :return polyRatio11
@@ -178,7 +206,7 @@ def function_return_all(funcname_all):
     
         if funcname_all == "all":
             
-            return {'simpleLinear':simpleLinear ,'test':test,'quadratic':quadratic
+            return {'simpleLinear':simpleLinear ,'quadratic':quadratic
                     ,'cubic':cubic,'saturationGrowthRate':saturationGrowthRate 
                     ,'simpleExponential':simpleExponential ,'simplePower':simplePower,'polyRatio22':polyRatio22
                     ,'polyRatio33':polyRatio33,'polyRatio44':polyRatio44,'michaelisMenten':michaelisMenten
@@ -194,11 +222,7 @@ def function_return_all(funcname_all):
                     ,'quadraticQuadratic':quadraticQuadratic ,'linear3':linear3
                     ,'gompertz2':gompertz2,'hill2':hill2,'sum3Exponentials':sum3Exponentials ,'gaussian':gaussian}
             
-        #REMOVED  - need to be added back
-        #'polyratio33':polyratio33 
-        #'exponential':exponential 
-        #'monomolecular':monomolecular 
-        #'linearquadratic':linearquadratic ,
+
            
         else:
             raise Exception('this function only accepts the param all, you sent - ', str(funcname_all))
