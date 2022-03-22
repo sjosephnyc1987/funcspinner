@@ -29,14 +29,14 @@ df = read_csv(url)
 data = df.values
 
 pdf = df[['Inflation rate','Jobless rate']]
-xx = np.array(pdf['Inflation rate'])
-yy = np.array(pdf['Jobless rate'])
+x = np.array(pdf['Inflation rate'])
+y = np.array(pdf['Jobless rate'])
 
 
 plt.figure(0)
 
 # plot input vs output
-plt.scatter(xx, yy, label='Raw Data')
+plt.scatter(x, y, label='Raw Data')
 plt.xlabel("Inflation Rate")
 plt.ylabel('Jobless Rate')
 plt.legend(loc='lower right')
@@ -50,36 +50,57 @@ print("<------ CURVE FITTING ALL MATRIX ------>\n")
 
 listoffuncs = funcspinner.function_return_all("all")
 
-results_matrix = pd.DataFrame(columns=['function_name', 'model_error', 'sj_error'])
+results_matrix = pd.DataFrame(columns=['function_name', 'model_error', 'standard_error', 'R-Squared'])
 
 
 for key, value in listoffuncs.items():
     
-    print("\n----- ", key, " ------")
+    #print("\n----- ", key, " ------")
     
     try:
-        fit_params_all, covariances_all = curve_fit(value, xx, yy ,maxfev=500000)
+        fit_params_all, covariances_all = curve_fit(value, x, y ,maxfev=500000)
     except TypeError as tpe:
         print(tpe)
         continue
     
     
-    model_error = np.linalg.norm(value(np.array(xx),*fit_params_all))
-    sj_model_error = np.linalg.norm(covariances_all)                             
+    
+    #to calulate the standard error
+    #---------------------------------
+    x_expected = np.linspace(min(x),max(x),len(x))
+
+    y_expected = value(np.array(x),*fit_params_all)
+
+    residuals = y - y_expected
+    squaresumofresiduals = np.sum(residuals**2)
+    std_error = np.sqrt(squaresumofresiduals/len(y_expected))
+    #print("standard error = ", str(std_error))
+    
+    
+    
+    #to calculate R-square
+    #standarddevparams2 = np.sqrt(np.diag(covariances))
+    squaresum = np.sum((y-np.mean(y))**2)
+    R2 = 1 - (squaresumofresiduals/squaresum)
+    # print("R-square = ",  R2)
+    
+
+    
+    model_error = np.linalg.norm(value(np.array(x),*fit_params_all))
+    #sj_model_error = np.linalg.norm(covariances_all)                             
     
     # print(' model error:', key, " - " ,np.linalg.norm(value(np.array(x),*fit_params_all)) )
     # print(' SJ model error: ', np.linalg.norm(covariances_all))
 
-    print("--- ", key, " -model error = ", model_error, " -sj_model_error = ", sj_model_error) 
-    print("               ********************             \n")
+    #print("--- ", key, " -model error = ", model_error, " -standard_error = ", std_error) 
+    #print("               ********************             \n")
 
-    results_matrix = results_matrix.append({'function_name':key , 'model_error': model_error, 'sj_error': sj_model_error}, ignore_index=True)
+    results_matrix = results_matrix.append({'function_name':key , 'model_error': model_error, 'standard_error': std_error,'R-Squared':R2}, ignore_index=True)
 
 
 # #get the function from the funcspinner class.
 # objective_function = funcspinner.function_return(functionname)
-
-
+print(results_matrix.sort_values(by=['standard_error']))
 
 # #to see what's in the function returned
 # import inspect

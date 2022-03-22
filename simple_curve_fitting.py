@@ -29,7 +29,7 @@ x_end =10
 x=np.linspace(x_start, x_end,100)
 
 
-functionname = "threeparameterlogistic"
+functionname = "polyRatio44"
 print("\n---------BEGIN---------")
 
 #get the function from the funcspinner class.
