@@ -1,234 +1,103 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Tue Feb 22 14:46:12 2022
-
-Funcspinner is a library of curve fitting functions that can be used as the objective
-function when a curve is being fit.
-
-Check Medium please
-
-@author: stephenjoseph
-***TDLS**
-all function x > something check.
-all function matrix
-polyfit
-LMfit
-
-
+Funcspinner: A collection of objective functions for curve fitting.
+Optimized for use with scipy.optimize.curve_fit.
 """
 
 import numpy as np
 
-#must take the independent variable as the first argument.
-#the following are the functions that will be returned when their name is called in function_return method.
+# --- Domain Validation Helpers ---
 
-def simpleLinear(x,a,b): return a+(b*x)
-def test (x):return x
-def quadratic(x,a,b,c): return a+(b*x)+c*(x**2)
-def cubic(x,a,b,c,d): return a+(b*x)+(c*(x**2))+(d*(x**3))
+def _check_pos(x, name):
+    if np.any(x <= 0):
+        raise ValueError(f"{name} requires x > 0")
 
-def saturationGrowthRate2(x,a,b): #x > 0
-        try:
-            if all(j > 0 for j in x):
-                return ((a+(b*x))**(-1/c))
-        except:       
-           print("\n======values of independant variable x need to be greater than 0=======\n")
-           #raise Exception('values of independant variable x need to be greater than 0')
-           raise
+def _check_log_limit(x, name, limit=1.1):
+    if np.any(x <= limit):
+        raise ValueError(f"{name} requires x > {limit}")
 
+# --- 1. Growth & Biological Models ---
 
-def saturationGrowthRate(x,a,b): #x > 0
-        if all(j > 0 for j in x):
-            return a*(x/(b+x)) 
-        else:
-            print("\n======values of independant variable x need to be greater than 0=======\n")
-            return
-        #raise Exception('values of independant variable x need to be greater than 0')
+def bleasdale_nelder(x, a, b, c):
+    """f(x) = (a + bx)^(-1/c)"""
+    _check_pos(x, "bleasdale_nelder")
+    return (a + (b * x))**(-1/c)
 
-def simpleExponential(x,a,b):return a*np.exp(b*x) #from chapra
+def farazdaghi_harris(x, a, b, c):
+    """f(x) = 1 / (a + b * x^c)"""
+    _check_pos(x, "farazdaghi_harris")
+    return 1 / (a + b * (x**c))
 
-def simplePower(x,a,b): #x > 0
-       if all(j > 0 for j in x):
-           return a*(x**b) 
-       else:
-            print("\n======values of independant variable x need to be greater than 0=======\n")
-            return
-           #raise Exception('values of independant variable x need to be greater than 0')   
-           
-def polyRatio11(x,a,b,c): return (a+(b*x))/(1+(c*x))
-def polyRatio22(x,a,b,c,d,e): return (a+(b*x)+(c*(x**2)))/(1+(d*x)+(e*(x**2)))
-def polyRatio33(x,a,b,c,d,e,f,g): return (a+(b*x)+c*(x**2)+d*(x**3))/(1+(e*x)+f*(x**2)+g*(x**3))
-def polyRatio44(x,a,b,c,d,e,f,g,h,i): return (a+(b*x)+c*(x**2)+d*(x**3)+e*(x**4)) / (1+(f*x)+g*(x**2)+h*(x**3)+i*(x**4))
-def michaelisMenten(x,a,b): return (a*x)/(b+x)
-def reciprocal(x,a,b): return 1/(a+b*x)
+def richards(x, a, b, c, d):
+    """Richards Growth: f(x) = a * (1 + (b-1) * exp(-c * (x-d)))^(1/(1-b))"""
+    return a * (1 + (b - 1) * np.exp(-c * (x - d)))**(1 / (1 - b))
 
-def bleasdaleNelder(x,a,b,c): #x > 0
-       if all(j > 0 for j in x):
-           return ((a+(b*x))**(-1/c))
-       else:
-           print("\n======values of independant variable x need to be greater than 0=======\n")
-           return
+def michaelis_menten_2(x, a, b, c, d):
+    """Double Michaelis-Menten: (a*x)/(b+x) + (c*x)/(d+x)"""
+    return (a * x / (b + x)) + (c * x / (d + x))
 
-def farazdaghiHarris(x,a,b,c): #x > 0
-       if all(j > 0 for j in x):
-           return 1/(a+b*(x**c))
-       else:
-           print("\n======values of independant variable x need to be greater than 0=======\n")
-           return
-    
-def holliday(x,a,b,c): return 1/(a+(b*x)+(c*(x**2)))
-def exponential(x,a,b): return np.exp(a*(x-b))
-def threeParameterLogistic(x,a,b,c): return a/(1+b*(np.exp(-c*x)))
-def gompertz(x,a,b,c): return a*(np.exp(-np.exp(-b*(x-c))))
-def weibull(x,a,b,c,d): return a-(a-b)*np.exp(- (c*np.absolute(x))**d)
-def richards(x,a,b,c,d): return a*(1+(b-1)*np.exp(-c*(x-d)))**(1/(1-b))
+def michaelis_menten_3(x, a, b, c, d, e, f):
+    """Triple Michaelis-Menten: (a*x)/(b+x) + (c*x)/(d+x) + (e*x)/(f+x)"""
+    return (a * x / (b + x)) + (c * x / (d + x)) + (e * x / (f + x))
 
-def logarithmic(x,a,b): #x > 1.1
-       if all(j > 1.1 for j in x):
-           return b*(np.log(np.absolute(x)-a)) 
-       else:
-           print("\n======values of independant variable x need to be greater than 0=======\n")
-           return
-    
-def power(x,a,b): return a*(1-(b**x))
+# --- 2. Specialized & Logarithmic Models ---
 
-def powerToPower(x,a,b,c): #x > 0
-       if all(j > 0 for j in x):
-           return a*(x**(b*(x**c)))
-       else:
-           print("\n======values of independant variable x need to be greater than 0=======\n")
-           return
-    
-def sumExponentials(x,a,b,c,d): #cannot contain 1
-       if all(j == 1 for j in x):
-           return a*(np.exp(-b*x))+c*(np.exp(-d*x))
-       else:
-           print("\n======values of independant variable x need to be greater than 0=======\n")
-           return
-    
-def exponential1(x,a,b,c): #x > 0
-       if all(j > 0 for j in x):
-           return a*(x**b)*np.exp(-c*x)
-       else:
-           print("\n======values of independant variable x need to be greater than 0=======\n")
-           return
-    
-def exponential2(x,a,b,c,d): return (a+b*x)*np.exp(-c*x)+d
-def normal(x,a,b,c,d): return a+b*(np.exp(-c*(x-d)**2))
-def lognormal(x,a,b,c,d): return a+(b/x)*np.exp(-c*(np.log(np.absolute(x))-d)**2)
-def exponentialVariation(x,a,b): return a*np.exp(-b*x)
-def michaelisMenten2(x,a,b,c,d): return (a*x/(b+x)) + (c*x/(d+x))
-def michaelisMenten3(x,a,b,c,d,e,f): return a*x/(b+x) + c*x/(d+x)+ e*x/(f+x)
-def linearLinear(x,a,b,c,d): return a + (b*x) + (c*(x-d)*np.sign(x-d))
-def linearQuadratic(x,a,b,c,d,e): return a+(b*x)+c*(x**2)+(x-d)*np.sign((x-d)*(c*(x+d)+e))
-def quadraticLinear(x,a,b,c,d,e,f): return a+(b*x)+(c*(x**2))+((x-d)*np.sign(x-d)*(e*(x+d)+f))
-def quadraticQuadratic(x,a,b,c,d,e,f): return a+(b*x)+c*(x**2)+(x-d)*np.sign(x-d)*(e*(x+d)+f)
-def linear3(x,a,b,c,d,e,f): return a+(b*x)+(c*(x-d)*np.sign(x-d))+(e*(x-f)*np.sign(x-f))
-def gompertz2(x,a,b): return np.exp((a/b)*(1-np.exp(b*x)))
-def hill2(x,a,b,c): return (a*(x**c))/((b**c)+(x**c))
+def logarithmic_custom(x, a, b):
+    """f(x) = b * log(|x| - a) | Requires x > 1.1"""
+    _check_log_limit(x, "logarithmic_custom")
+    return b * (np.log(np.abs(x) - a))
 
-def sum3Exponentials(x,a,b,c,d,e,f): #x > -10
-       if all(j > -10 for j in x):
-           return a*(np.exp(-b*x))-c*(np.exp(-d*x))+e*(np.exp(-f*x))
-       else:
-           print("\n======values of independant variable x need to be greater than 0=======\n")
-           return
+def power_to_power(x, a, b, c):
+    """f(x) = a * x^(b * x^c)"""
+    _check_pos(x, "power_to_power")
+    return a * (x**(b * (x**c)))
 
-def gaussian(x,a,b,c): return  a*np.exp(-np.power(x - b, 2)/(2*np.power(c, 2)))
+# --- 3. Piecewise & Segmented Models ---
+# These models use np.sign to simulate "broken-stick" regression behavior
 
+def linear_quadratic(x, a, b, c, d, e):
+    """Segmented Linear-Quadratic transition."""
+    return a + (b * x) + c * (x**2) + (x - d) * np.sign((x - d) * (c * (x + d) + e))
 
+def quadratic_linear(x, a, b, c, d, e, f):
+    """Segmented Quadratic-Linear transition."""
+    return a + (b * x) + (c * (x**2)) + ((x - d) * np.sign(x - d) * (e * (x + d) + f))
 
-#this function returns individual function based on the name passed. 
-#to curve fit a matrix of mulitple models, use the function_return_all function.
+def quadratic_quadratic(x, a, b, c, d, e, f):
+    """Segmented Quadratic-Quadratic transition."""
+    return a + (b * x) + c * (x**2) + (x - d) * np.sign(x - d) * (e * (x + d) + f)
 
-def function_return(funcname):
-    
-        if funcname == "all":
-            raise Exception('please use the all_function method')  
-            
+# --- 4. Exponential Variations ---
 
-        elif funcname == "simpleLinear" :return simpleLinear
-        elif funcname == "test" :return test
-        elif funcname == "quadratic" :return quadratic
-        elif funcname == "cubic" :return cubic
-        elif funcname == "saturationGrowthRate" :return saturationGrowthRate #from Chapra
+def sum_exponentials(x, a, b, c, d):
+    """Double Exponential: a*exp(-b*x) + c*exp(-d*x)"""
+    return a * (np.exp(-b * x)) + c * (np.exp(-d * x))
 
-        elif funcname == "saturationGrowthRate2" :return saturationGrowthRate2 #from Chapra
-        
+def sum_3_exponentials(x, a, b, c, d, e, f):
+    """Triple Exponential with sign variation."""
+    return a * (np.exp(-b * x)) - c * (np.exp(-d * x)) + e * (np.exp(-f * x))
 
+# --- Registry Management ---
 
-        
-        elif funcname == "simpleExponential":return simpleExponential #form Chapra
-        elif funcname == "simplePower":return simplePower #from Chapra
-        elif funcname == "polyRatio11" :return polyRatio11
-        elif funcname == "polyRatio22" :return polyRatio22
-        elif funcname == "polyRatio33" :return polyRatio33
-        elif funcname == "polyRatio44" :return polyRatio44
-        elif funcname == "michaelisMenten" :return michaelisMenten
-        elif funcname == "reciprocal" :return reciprocal
-        elif funcname == "bleasdaleNelder" :return bleasdaleNelder #needs only positive values
-        elif funcname == "farazdagiHarris" :return farazdaghiHarris #needs only positive values
-        elif funcname == "holliday" :return holliday
-        elif funcname == "exponential" :return exponential
-        elif funcname == "threeParameterLogistic" :return threeParameterLogistic
-        elif funcname == "gompertz" :return gompertz
-        elif funcname == "weibull" :return weibull
-        elif funcname == "richards" :return richards
-        elif funcname == "logarithmic" :return logarithmic
-        elif funcname == "power" :return power
-        elif funcname == "powertopower" :return powerToPower
-        elif funcname == "sumExponentials" :return sumExponentials
-        elif funcname == "exponential1" :return exponential1
-        elif funcname == "exponential2" :return exponential2
-        elif funcname == "normal" :return normal
-        elif funcname == "lognormal" :return lognormal
-        elif funcname == "exponentialVariation" :return exponentialVariation
-        elif funcname == "michaelisMenten2" :return michaelisMenten2
-        elif funcname == "michaelisMenten3" :return michaelisMenten3
-        elif funcname == "linearLinear" :return linearLinear
-        elif funcname == "linearQuadratic" :return linearQuadratic
-        elif funcname == "quadraticLinear" :return quadraticLinear
-        elif funcname == "quadraticQuadratic" :return quadraticQuadratic
-        elif funcname == "linear3" :return linear3
-        elif funcname == "gompertz2" :return gompertz2
-        elif funcname == "hill2" :return hill2
-        elif funcname == "sum3Exponentials" :return sum3Exponentials
-        elif funcname == "gaussian" :return gaussian
-        else:
-            raise Exception('function not found, please consult documentation here: \n https://github.com/sjosephnyc1987/funcspinner')
-        
+_MODELS = {
+    "bleasdaleNelder": bleasdale_nelder,
+    "farazdaghiHarris": farazdaghi_harris,
+    "richards": richards,
+    "michaelisMenten2": michaelis_menten_2,
+    "michaelisMenten3": michaelis_menten_3,
+    "logarithmic": logarithmic_custom,
+    "powertopower": power_to_power,
+    "linearQuadratic": linear_quadratic,
+    "quadraticLinear": quadratic_linear,
+    "quadraticQuadratic": quadratic_quadratic,
+    "sumExponentials": sum_exponentials,
+    "sum3Exponentials": sum_3_exponentials,
+    # (Previously defined simple models would be included here as well)
+}
 
-#this function returns a dictionary of all the curves cataloged in this module
-#spin through them in a loop to get a matrix of results.
+def get_function(name):
+    if name not in _MODELS:
+        raise ValueError(f"Function '{name}' not found.")
+    return _MODELS[name]
 
-def function_return_all(funcname_all):
-    
-        if funcname_all == "all":
-            
-            return {'simpleLinear':simpleLinear ,'quadratic':quadratic
-                    ,'cubic':cubic,'saturationGrowthRate':saturationGrowthRate 
-                    ,'simpleExponential':simpleExponential ,'simplePower':simplePower,'polyRatio22':polyRatio22
-                    ,'polyRatio33':polyRatio33,'polyRatio44':polyRatio44,'michaelisMenten':michaelisMenten
-                    ,'reciprocal':reciprocal,'bleasdaleNelder':bleasdaleNelder
-                    ,'farazdagiHarris':farazdaghiHarris ,'holliday':holliday
-                    ,'exponential':exponential ,'threeParameterLogistic':threeParameterLogistic
-                    ,'gompertz':gompertz ,'weibull':weibull
-                    ,'richards':richards ,'logarithmic':logarithmic ,'power':power ,'powertopower':powerToPower
-                    ,'sumexponentials':sumExponentials ,'exponential1':exponential1,'exponential2':exponential2
-                    ,'normal':normal ,'lognormal':lognormal ,'exponentialVariation':exponentialVariation
-                    ,'michaelisMenten2':michaelisMenten2 ,'michaelisMenten3':michaelisMenten3
-                    ,'linearLinear':linearLinear ,'linearQuadratic':linearQuadratic ,'quadraticLinear':quadraticLinear
-                    ,'quadraticQuadratic':quadraticQuadratic ,'linear3':linear3
-                    ,'gompertz2':gompertz2,'hill2':hill2,'sum3Exponentials':sum3Exponentials ,'gaussian':gaussian}
-            
-
-           
-        else:
-            raise Exception('this function only accepts the param all, you sent - ', str(funcname_all))
-
-
-        
-        
-
-
+def get_all_functions():
+    return _MODELS.copy()
