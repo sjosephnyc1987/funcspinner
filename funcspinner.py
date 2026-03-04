@@ -1,6 +1,33 @@
 """
-Funcspinner: A collection of objective functions for curve fitting.
-Optimized for use with scipy.optimize.curve_fit.
+Funcspinner: A Comprehensive Objective Function Library for Curve Fitting
+==========================================================================
+
+Funcspinner is a collection of mathematical models designed for regression 
+analysis and curve fitting (optimized for `scipy.optimize.curve_fit`). 
+
+It provides a wide range of functions including:
+    * Growth Models (Gompertz, Richards, Weibull)
+    * Biological Kinetics (Michaelis-Menten, Saturation Growth)
+    * Segmented/Piecewise Regression (Linear-Linear, Quadratic-Linear)
+    * Rational Functions (PolyRatios 11 through 44)
+    * Statistical Distributions (Gaussian, Lognormal)
+
+Standardization:
+----------------
+All functions take the independent variable `x` as the first argument,
+followed by the model parameters (a, b, c, ...). Most functions are 
+vectorized using NumPy for high-performance array processing.
+
+Usage:
+------
+>>> from funcspinner import get_function
+>>> model = get_function("simplePower")
+>>> popt, pcov = curve_fit(model, x_data, y_data)
+
+Author: Stephen Joseph (@sjosephnyc1987)
+Created: Feb 22, 2022
+Updated: 2026 (Modernized for NumPy/SciPy integration)
+License: MIT
 """
 
 import numpy as np
