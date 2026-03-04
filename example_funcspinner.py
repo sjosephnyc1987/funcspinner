@@ -1,141 +1,112 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Tue Feb 22 17:36:41 2022
+Funcspinner: Specific Model Analysis & Subset Testing
+=====================================================
 
-@author: stephenjoseph
+DESCRIPTION:
+    An example workflow for applying a single Funcspinner model to real-world 
+    economic data. It performs a full-dataset fit, calculates statistical 
+    accuracy (R², Std Error), and repeats the process on a data subset 
+    (Testing Mode) to evaluate model stability.
 
-Example code to test the funcspinner package.
+HOW TO USE:
+    1. Set 'FUNCTION_NAME' to your desired model (e.g., 'polyRatio44').
+    2. Run the script: python example_funcspinner.py
+    3. View the console output for optimized parameters and the generated 
+       comparison plot.
+
+AUTHOR: Stephen Joseph (@sjosephnyc1987)
+LICENSE: GNU GPL v3.0
 """
 
-
-from pandas import read_csv
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
-import funcspinner
-
-#readd data here
-url = 'https://raw.githubusercontent.com/sjosephnyc1987/datasets/main/TradingEconimicsWorldDataMarch2022.csv'
-df = read_csv(url)
-data = df.values
-
-#extract x and y
-pdf = df[['Inflation rate','Jobless rate']]
-xx = np.array(pdf['Inflation rate'])
-yy = np.array(pdf['Jobless rate'])
-
-# plot input vs output
-plt.scatter(xx, yy, label='Raw Data')
-plt.xlabel("Inflation Rate")
-plt.ylabel('Jobless Rate')
-plt.legend(loc='lower right')
-
-functionname = "polyRatio44"
-
-#get the function from the funcspinner class.
-objective_function = funcspinner.function_return(functionname)
-
-#to see what's in the function returned
 import inspect
-print(inspect.getsource(objective_function))
+import funcspinner as fs
 
+# --- Configuration ---
+DATA_URL = 'https://raw.githubusercontent.com/sjosephnyc1987/datasets/main/TradingEconimicsWorldDataMarch2022.csv'
+FUNCTION_NAME = "polyRatio44"
+MAX_EVALS = 500000
 
-#for printing out the results.
-coeffs = ["a","b","c","d","e","f","g","h","i","j","k"]
+def calculate_metrics(y_true, y_pred):
+    """Calculates Standard Error and R-squared."""
+    residuals = y_true - y_pred
+    rss = np.sum(residuals**2)
+    std_err = np.sqrt(rss / len(y_true))
+    
+    ss_tot = np.sum((y_true - np.mean(y_true))**2)
+    r_squared = 1 - (rss / ss_tot)
+    return std_err, r_squared
 
-# do linear fit
-fit_paramsL, covariances = curve_fit(objective_function, xx, yy, maxfev=500000)
+def run_example():
+    # 1. Data Acquisition
+    print(f"Fetching data from: {DATA_URL}...")
+    df = pd.read_csv(DATA_URL)
+    pdf = df[['Inflation rate', 'Jobless rate']].dropna()
+    x_full = pdf['Inflation rate'].values
+    y_full = pdf['Jobless rate'].values
 
+    # 2. Get Objective Function
+    obj_func = fs.get_function(FUNCTION_NAME)
+    print("\n" + "-"*30)
+    print(f"Model: {FUNCTION_NAME}")
+    print(inspect.getsource(obj_func))
+    print("-"*30)
 
-print ("Fitting curve using the", functionname, "function")
-print ("-----------------")
-print('Parameter values: ')
+    # 3. Fit Model to Full Dataset
+    popt, _ = curve_fit(obj_func, x_full, y_full, maxfev=MAX_EVALS)
+    
+    # Calculate performance
+    y_pred_full = obj_func(x_full, *popt)
+    std_err, r2 = calculate_metrics(y_full, y_pred_full)
 
-i=0
-for coeff in fit_paramsL:
-    print(coeffs[i], "=" , coeff)
-    i = i+1
+    # Print Results
+    coeffs = list("abcdefghijk")
+    print(f"\n--- Full Fit: {FUNCTION_NAME} ---")
+    for i, val in enumerate(popt):
+        print(f"{coeffs[i]} = {val:.6f}")
+    print(f"Standard Error: {std_err:.4f}")
+    print(f"R-Squared: {r2:.4f}")
 
+    # 4. Testing Mode (Subset Analysis: Inflation > 2)
+    print("\n" + "*"*10 + " ENTERING TESTING MODE (Inflation > 2) " + "*"*10)
+    pdf_test = pdf[pdf['Inflation rate'] > 2]
+    x_test = pdf_test['Inflation rate'].values
+    y_test = pdf_test['Jobless rate'].values
 
-x_monotonic = np.arange(min(xx),max(xx),1)
-y_fit = objective_function(x_monotonic,*fit_paramsL)
+    popt_test, _ = curve_fit(obj_func, x_test, y_test, maxfev=MAX_EVALS)
+    y_pred_test = obj_func(x_test, *popt_test)
+    std_err_t, r2_t = calculate_metrics(y_test, y_pred_test)
 
+    print(f"Subset samples: {len(x_test)}")
+    print(f"Subset Std Error: {std_err_t:.4f}")
+    print(f"Subset R-Squared: {r2_t:.4f}")
 
+    # 5. Visualization
+    plt.figure(figsize=(12, 6))
+    
+    # Plot 1: Raw Data and Full Fit
+    plt.scatter(x_full, y_full, color='gray', alpha=0.3, label='Raw Data')
+    
+    # Generate smooth line for fit
+    x_mono = np.linspace(x_full.min(), x_full.max(), 500)
+    plt.plot(x_mono, obj_func(x_mono, *popt), 'r--', linewidth=2, label='Full Fit')
+    
+    # Plot 2: Test Subset Fit
+    x_mono_test = np.linspace(x_test.min(), x_test.max(), 500)
+    plt.plot(x_mono_test, obj_func(x_mono_test, *popt_test), 'g:', linewidth=2, label='Subset Fit (Inf > 2)')
 
-#to calulate the standard error
-#---------------------------------
-#x_expected = np.linspace(min(x),max(x),len(x))
+    plt.xlabel("Inflation Rate (%)")
+    plt.ylabel("Jobless Rate (%)")
+    plt.title(f"Funcspinner Analysis: {FUNCTION_NAME}")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.show()
 
-#you can get standard error of individual variables using np.sqrt(np.diag(covariances)) 
-
-y_expected = objective_function(np.array(xx),*fit_paramsL)
-
-residuals = yy - y_expected
-squaresumofresiduals = np.sum(residuals**2)
-std_error = np.sqrt(squaresumofresiduals/len(y_expected))
-print("standard error = ", str(std_error))
-
-
-#to calculate R-square
-#standarddevparams2 = np.sqrt(np.diag(covariances))
-squaresum = np.sum((yy-np.mean(yy))**2)
-R2 = 1 - (squaresumofresiduals/squaresum)
-print("R-square = ",  R2)
-
-plt.plot(x_monotonic,y_fit,'--',color='red',label='model fit')
-plt.legend(loc='lower right')
-title = "plotting raw data using the " + functionname + " model"
-plt.title(title)
-
-
-#testing =====================
-#==============
-
-print("\n\n******** enter testing mode ************")
-pdf2 = pdf[pdf['Inflation rate'] > 2]
-
-print("length of new dataset = " , len(pdf2))
-x_test = np.array(pdf2['Inflation rate'])
-y_test = np.array(pdf2['Jobless rate'])
-
-fit_params_test, covariance_test = curve_fit(objective_function, x_test, y_test, maxfev=500000)
-
-
-i=0
-for coeff in fit_params_test:
-    print(coeffs[i], "=" , coeff)
-    i = i+1
-
-
-x_monotonic_test = np.arange(min(x_test),max(x_test),1)
-y_fit_test = objective_function(x_monotonic_test,*fit_params_test)
-
-
-#to calulate the standard error in testing mode
-#----------------------------------------------------
-
-#you can get standard error of individual variables using np.sqrt(np.diag(covariances)) 
-
-y_expected_test = objective_function(np.array(x_test),*fit_params_test)
-
-residuals_test = y_test - y_expected_test
-squaresumofresiduals_test = np.sum(residuals_test**2)
-std_error_test = np.sqrt(squaresumofresiduals_test/len(y_expected_test))
-print("standard error test mode= ", str(std_error_test))
-
-
-#to calculate R-square
-#standarddevparams2_test = np.sqrt(np.diag(covariance_test))
-squaresum_test = np.sum((y_test-np.mean(y_test))**2)
-R2 = 1 - (squaresumofresiduals_test/squaresum_test)
-print("R-square test mode= ",  R2)
-
-print("\n\n\n\n")
-
-
-#====== end testing =====================
-#====================
+if __name__ == "__main__":
+    run_example()
 
 
 
