@@ -60,9 +60,3 @@ This project is licensed under the **GNU General Public License v3 (GPL-3.0)**. 
 
 **Stephen Joseph** (@sjosephnyc1987)
 
----
-
-### Next Steps
-
-1. **Local Testing:** Run `pip install -e .` in your root directory to install it in "editable" mode and test your imports.
-2. **Upload to PyPI:** Would you like me to walk you through the steps of using **Twine** to upload this so people can just run `pip install funcspinner` without the GitHub link?
